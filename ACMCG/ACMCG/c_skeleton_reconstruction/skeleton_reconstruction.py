@@ -20,7 +20,7 @@ def connections_cal(edge, representatives, data):
     return connections
 
 
-def skeleton_reconstruction_dislike(skeleton, anomaly, representatives, data, real_labels, constraint_graph, count):
+def skeleton_reconstruction_dislike(skeleton, anomaly, representatives, data, real_labels, constraint_graph):
     skeleton.remove_edge(anomaly[0], anomaly[1])
     connections = connections_cal(anomaly, representatives, data)
     find = False
@@ -45,7 +45,7 @@ def skeleton_reconstruction_dislike(skeleton, anomaly, representatives, data, re
     if find == False:
         representatives.append(anomaly[0])
         skeleton.nodes[anomaly[0]]["uncertainty"] = 0
-    return skeleton, representatives, constraint_graph, count
+    return skeleton, representatives, constraint_graph
 
 
 def uncertainty_propagation_like(skeleton, anomaly, alpha):
@@ -72,10 +72,10 @@ def uncertainty_propagation_dislike(skeleton, anomaly, beta):
     return skeleton
 
 
-def skeleton_reconstruction(skeleton, anomaly, representatives, data, real_labels, constraint_graph, count, result):
+def skeleton_reconstruction(skeleton, anomaly, representatives, data, real_labels, constraint_graph, result):
     if result == "like":
         skeleton = skeleton_reconstruction_like(skeleton, anomaly)
     if result == "dislike":
-        skeleton, representatives, constraint_graph, count = skeleton_reconstruction_dislike(
-            skeleton, anomaly, representatives, data, real_labels, constraint_graph, count)
-    return skeleton, representatives, constraint_graph, count
+        skeleton, representatives, constraint_graph = skeleton_reconstruction_dislike(
+            skeleton, anomaly, representatives, data, real_labels, constraint_graph)
+    return skeleton, representatives, constraint_graph

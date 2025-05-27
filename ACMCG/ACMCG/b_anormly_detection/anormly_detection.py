@@ -74,12 +74,33 @@ def constraint_judgement(G, pairwise):
             result = "unknown"
     return result
 
-def judgement(anomaly,constraint_graph,real_labels):
-    pairwise=[int(anomaly[0]),int(anomaly[1])]
-    result=constraint_judgement(constraint_graph, pairwise)
-    if result=="unknown":
-        constraint_graph,result=human_judgement(pairwise, real_labels, constraint_graph)
-        judgement_type="human"
+def auto_judgement(pairwise, data, mean, std, constraint_graph):
+    node1, node2 = pairwise
+    dist = np.linalg.norm(data[node1] - data[node2])
+
+    if dist < mean-4.753*std:
+        result = "like"
+        weight = 0
     else:
-        judgement_type="constraint"
-    return constraint_graph,result,judgement_type
+        result = "unknown"
+
+    if result == "like":
+        constraint_graph.add_edge(node1, node2, weight=weight)
+
+    return result
+
+
+
+def judgement(anomaly, constraint_graph, real_labels, data, mean, std):
+    pairwise = [int(anomaly[0]), int(anomaly[1])]
+    result = constraint_judgement(constraint_graph, pairwise)
+    if result == "unknown":
+        result = auto_judgement(pairwise, data, mean, std, constraint_graph)
+        if result == "unknown":
+            constraint_graph, result = human_judgement(pairwise, real_labels, constraint_graph)
+            judgement_type = "human"
+        else:
+            judgement_type = "auto"
+    else:
+        judgement_type = "constraint"
+    return constraint_graph, result, judgement_type

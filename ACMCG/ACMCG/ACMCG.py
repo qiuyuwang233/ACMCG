@@ -169,7 +169,7 @@ def connections_cal(edge, representatives, data):
 
 
 def skeleton_reconstruction_dislike(skeleton, anomaly, representatives, data, real_labels, constraint_graph,
-                                    threshold, epsilon, count):
+                                    threshold, epsilon):
     skeleton.remove_edge(anomaly[0], anomaly[1])
     connections = connections_cal(anomaly, representatives, data)
     find = False
@@ -194,7 +194,7 @@ def skeleton_reconstruction_dislike(skeleton, anomaly, representatives, data, re
     if not find:
         representatives.append(anomaly[0])
         skeleton.nodes[anomaly[0]]["uncertainty"] = 0
-    return skeleton, representatives, constraint_graph, count
+    return skeleton, representatives, constraint_graph
 
 
 def uncertainty_propagation_like(skeleton, anomaly, alpha):
@@ -222,13 +222,13 @@ def uncertainty_propagation_dislike(skeleton, anomaly, beta):
 
 
 def skeleton_reconstruction(skeleton, anomaly, representatives, data, real_labels, constraint_graph, threshold,
-                            epsilon, count, result):
+                            epsilon, result):
     if result == "like":
         skeleton = skeleton_reconstruction_like(skeleton, anomaly)
     elif result == "dislike":
-        skeleton, representatives, constraint_graph, count = skeleton_reconstruction_dislike(
-            skeleton, anomaly, representatives, data, real_labels, constraint_graph, threshold, epsilon, count)
-    return skeleton, representatives, constraint_graph, count
+        skeleton, representatives, constraint_graph = skeleton_reconstruction_dislike(
+            skeleton, anomaly, representatives, data, real_labels, constraint_graph, threshold, epsilon)
+    return skeleton, representatives, constraint_graph
 
 
 def iteration_once(skeleton, representatives, data, real_labels, constraint_graph, mean, std):
@@ -238,8 +238,8 @@ def iteration_once(skeleton, representatives, data, real_labels, constraint_grap
         constraint_graph, result, judgement_type = judgement(anomaly, constraint_graph, real_labels, data, mean, std)
         if judgement_type == "human":
             count += 1
-        skeleton, representatives, constraint_graph, count = skeleton_reconstruction(
-            skeleton, anomaly, representatives, data, real_labels, constraint_graph, mean, std, count, result)
+        skeleton, representatives, constraint_graph = skeleton_reconstruction(
+            skeleton, anomaly, representatives, data, real_labels, constraint_graph, mean, std, result)
     return skeleton, representatives, constraint_graph, count, suspend
 
 
